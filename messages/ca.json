@@ -417,7 +417,9 @@
                 "email": "Correu electrònic",
                 "emailPlaceholder": "Introdueix el teu correu electrònic",
                 "save": "Desar els canvis",
-                "saving": "Desant canvis"
+                "saving": "Desant canvis",
+                "language": "Idioma",
+                "timezone": "Zona horària"
             },
             "security": {
                 "title": "Seguretat",

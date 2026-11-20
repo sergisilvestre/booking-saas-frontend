@@ -5,7 +5,6 @@ import { getMessages } from "next-intl/server";
 import "./globals.css";
 
 import { LoadingProvider } from "@/components/providers/LoadingProvider";
-import { CurrentUserProvider } from "@/components/providers/CurrentUserProvider";
 import { ConfigOptionsProvider } from "@/components/providers/ConfigOptionsProvider";
 
 const geistSans = Geist({
@@ -25,8 +24,9 @@ export const metadata: Metadata = {
 
 type Props = {
   children: React.ReactNode;
+  // Absent on routes outside /[lang] (e.g. /admin, English only).
   params: Promise<{
-    lang: string;
+    lang?: string;
   }>;
 };
 
@@ -34,7 +34,7 @@ export default async function LangLayout({
   children,
   params,
 }: Props) {
-  const { lang } = await params;
+  const { lang = "en" } = await params;
 
   const messages = await getMessages({
     locale: lang,
@@ -53,9 +53,7 @@ export default async function LangLayout({
         >
           <LoadingProvider>
             <ConfigOptionsProvider>
-              <CurrentUserProvider>
-                {children}
-              </CurrentUserProvider>
+              {children}
             </ConfigOptionsProvider>
           </LoadingProvider>
         </NextIntlClientProvider>

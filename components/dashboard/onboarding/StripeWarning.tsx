@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { createStripeOnboardingSession } from "@/services/stripe-onboarding";
 
 export default function StripeWarning() {
     const t = useTranslations("dashboard.settings.warnings");
+    const locale = useLocale();
     const [loadingStripe, setLoadingStripe] = useState(false);
 
     const handleStripeOnboarding = async () => {
@@ -16,7 +17,7 @@ export default function StripeWarning() {
         try {
             setLoadingStripe(true);
 
-            const url = await createStripeOnboardingSession();
+            const url = await createStripeOnboardingSession(locale);
 
             window.location.assign(url);
         } catch (error) {

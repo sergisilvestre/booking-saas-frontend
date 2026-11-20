@@ -418,7 +418,9 @@
                 "email": "Email",
                 "emailPlaceholder": "Enter your email",
                 "save": "Save changes",
-                "saving": "Saving changes ..."
+                "saving": "Saving changes ...",
+                "language": "Language",
+                "timezone": "Timezone"
             },
             "google": {
                 "title": "Google account",

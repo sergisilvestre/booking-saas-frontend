@@ -48,7 +48,10 @@ type Props = {
             namePlaceholder: string;
             email: string;
             emailPlaceholder: string;
+            language: string;
+            timezone: string;
             save: string;
+            saving: string;
         };
         google: {
             title: string;

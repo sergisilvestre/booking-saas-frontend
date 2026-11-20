@@ -13,7 +13,8 @@ type Props = {
     currency: string;
     currencies: CurrencyOption[];
     configurationLoaded: boolean;
-    error?: string;
+    priceError?: string;
+    currencyError?: string;
     onPriceChange: (value: string) => void;
     onCurrencyChange: (value: string) => void;
 };
@@ -23,7 +24,8 @@ export default function PriceCurrencyFields({
     currency,
     currencies,
     configurationLoaded,
-    error,
+    priceError,
+    currencyError,
     onPriceChange,
     onCurrencyChange,
 }: Props) {
@@ -63,12 +65,12 @@ export default function PriceCurrencyFields({
                         }
                         className={inputClass}
                         required
-                        aria-invalid={Boolean(error)}
+                        aria-invalid={Boolean(priceError)}
                     />
 
-                    {error && (
+                    {priceError && (
                         <p className="mt-1 text-sm text-red-600">
-                            {error}
+                            {priceError}
                         </p>
                     )}
                 </div>
@@ -103,6 +105,12 @@ export default function PriceCurrencyFields({
                             </option>
                         ))}
                     </select>
+
+                    {currencyError && (
+                        <p className="mt-1 text-sm text-red-600">
+                            {currencyError}
+                        </p>
+                    )}
 
                     {configurationLoaded && currencies.length === 0 && (
                         <p className="mt-1 text-sm text-gray-500">

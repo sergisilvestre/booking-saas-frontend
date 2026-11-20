@@ -8,8 +8,17 @@ type StripeOnboardingResponse = {
 /**
  * Requests a Stripe onboarding URL from the backend.
  */
-export async function createStripeOnboardingSession(): Promise<string> {
-  const response = await apiFetch("organization/onboarding/form-data");
+export async function createStripeOnboardingSession(
+  locale = "ca",
+): Promise<string> {
+  const response = await apiFetch(
+    "organization/organization/stripe/onboarding-link",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ locale }),
+    },
+  );
 
   const data: StripeOnboardingResponse = await response.json();
 

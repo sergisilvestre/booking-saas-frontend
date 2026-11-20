@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import LoginAuth from "./LoginAuth";
-import LoginForm from "./LoginForm";
 import GoogleLoginButton from "./GoogleLoginButton";
 
 type Props = {
@@ -48,27 +47,6 @@ export default async function LoginPage({ params }: Props) {
                                 label={t("continueWithGoogle")}
                             />
 
-                            <div className="my-7 flex items-center gap-4">
-                                <div className="h-px flex-1 bg-gray-200" />
-
-                                <span className="text-xs text-gray-400">
-                                    {t("or")}
-                                </span>
-
-                                <div className="h-px flex-1 bg-gray-200" />
-                            </div>
-
-                            <LoginForm lang={lang} />
-
-                            <p className="mt-8 text-center text-sm text-gray-500">
-                                {t("noAccount")}{" "}
-                                <Link
-                                    href={`/${lang}/auth/register`}
-                                    className="font-semibold text-gray-900 hover:underline"
-                                >
-                                    {t("createAccount")}
-                                </Link>
-                            </p>
                         </div>
 
                         <p className="mt-6 text-center text-xs text-gray-400">

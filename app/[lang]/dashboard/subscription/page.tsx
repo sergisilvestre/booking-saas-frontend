@@ -81,7 +81,7 @@ export default async function SubscriptionPage({
     const plans = await getSubscriptionPlans(lang);
 
     // TODO: Load this from the authenticated backend.
-    const paymentMethod: PaymentMethod | null = null;
+    const paymentMethod = null as PaymentMethod | null;
 
     return (
         <div className="space-y-6">

@@ -417,7 +417,9 @@
                 "email": "Correo electrónico",
                 "emailPlaceholder": "Introduce tu correo electrónico",
                 "save": "Guardar cambios",
-                "saving": "Guardando cambios ..."
+                "saving": "Guardando cambios ...",
+                "language": "Idioma",
+                "timezone": "Zona horaria"
             },
             "google": {
                 "title": "Cuenta de Google",
