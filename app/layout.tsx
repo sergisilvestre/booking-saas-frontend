@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import "./globals.css";
 
+import CookieConsent from "@/components/CookieConsent";
 import { LoadingProvider } from "@/components/providers/LoadingProvider";
 import { ConfigOptionsProvider } from "@/components/providers/ConfigOptionsProvider";
 
@@ -54,6 +55,7 @@ export default async function LangLayout({
           <LoadingProvider>
             <ConfigOptionsProvider>
               {children}
+              <CookieConsent />
             </ConfigOptionsProvider>
           </LoadingProvider>
         </NextIntlClientProvider>

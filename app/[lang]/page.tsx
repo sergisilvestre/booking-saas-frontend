@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import UserTimezoneInitializer from "@/components/UserTimezoneInitializer";
 import { apiFetch } from "@/lib/api";
+import CookieSettingsButton from "@/components/CookieSettingsButton";
 
 type HomePageProps = {
   params: Promise<{
@@ -511,13 +512,15 @@ export default async function HomePage({
           <p>{t("footer.copyright")}</p>
 
           <div className="flex gap-6">
-            <a href="#" className="hover:text-gray-900">
+            <Link href={`/${lang}/privacy`} className="hover:text-gray-900">
               {t("footer.privacy")}
-            </a>
+            </Link>
 
             <a href="#" className="hover:text-gray-900">
               {t("footer.terms")}
             </a>
+
+            <CookieSettingsButton />
           </div>
         </div>
       </footer>
