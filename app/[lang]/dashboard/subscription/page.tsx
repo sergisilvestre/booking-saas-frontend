@@ -1,11 +1,9 @@
-import { getTranslations } from "next-intl/server";
-import { apiFetch } from "@/lib/api";
+"use client";
 
-type Props = {
-    params: Promise<{
-        lang: string;
-    }>;
-};
+import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+
+import { apiFetch } from "@/lib/api";
 
 type SubscriptionPlanFeature = {
     key: string;
@@ -46,6 +44,7 @@ async function getSubscriptionPlans(
         `public/plans?locale=${encodeURIComponent(locale)}`,
         {
             auth: false,
+            showLoading: false,
         }
     );
 
@@ -68,17 +67,29 @@ async function getSubscriptionPlans(
     return result.data.filter((plan) => plan.active);
 }
 
-export default async function SubscriptionPage({
+// Client component: plans are loaded in the browser (the site is exported as static HTML).
+export default function SubscriptionPage({
     params,
-}: Props) {
-    const { lang } = await params;
+}: {
+    params: Promise<{ lang: string }>;
+}) {
+    const t = useTranslations("dashboard.subscription");
+    const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
 
-    const t = await getTranslations({
-        locale: lang,
-        namespace: "dashboard.subscription",
-    });
+    useEffect(() => {
+        let cancelled = false;
 
-    const plans = await getSubscriptionPlans(lang);
+        params
+            .then(({ lang }) => getSubscriptionPlans(lang))
+            .then((result) => {
+                if (!cancelled) setPlans(result);
+            })
+            .catch((error) => console.error(error));
+
+        return () => {
+            cancelled = true;
+        };
+    }, [params]);
 
     // TODO: Load this from the authenticated backend.
     const paymentMethod = null as PaymentMethod | null;
