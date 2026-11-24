@@ -1,0 +1,72 @@
+name: Deploy web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check deploy secrets
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_DIR: ${{ secrets.SSH_DIR }}
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || vars.NEXT_PUBLIC_API_URL }}
+        run: |
+          missing=""
+          for name in SSH_PRIVATE_KEY SSH_HOST SSH_PORT SSH_USER SSH_DIR NEXT_PUBLIC_API_URL; do
+            [ -n "${!name}" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing:$missing. Add them as repository secrets (NEXT_PUBLIC_API_URL may also be a repository variable) in Settings > Secrets and variables > Actions"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Static export for Hostinger Premium (no Node): the API URL is baked in at build time.
+      - run: npm run build
+        env:
+          BUILD_STATIC: "true"
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || vars.NEXT_PUBLIC_API_URL }}
+
+      - name: Upload out/ to Hostinger over SSH (rsync)
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_DIR: ${{ secrets.SSH_DIR }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keygen -y -f ~/.ssh/id_deploy > /dev/null \
+            || { echo "::error::SSH_PRIVATE_KEY is not a valid private key: paste the whole file, from -----BEGIN OPENSSH PRIVATE KEY----- to -----END OPENSSH PRIVATE KEY-----"; exit 1; }
+          ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" >> ~/.ssh/known_hosts
+          ssh -i ~/.ssh/id_deploy -p "$SSH_PORT" -o BatchMode=yes "$SSH_USER@$SSH_HOST" true \
+            || { echo "::error::SSH login to Hostinger failed: check SSH_HOST, SSH_PORT, SSH_USER and that the public key is added in hPanel > SSH Access"; exit 1; }
+          ssh -i ~/.ssh/id_deploy -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "test -d \"$SSH_DIR\"" || {
+            echo "::error::SSH_DIR does not exist on the server. It is relative to the home folder, e.g. domains/<domain>/public_html. Domains found:"
+            ssh -i ~/.ssh/id_deploy -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" 'ls -1 ~/domains' | sed 's#^#  domains/#; s#$#/public_html#'
+            exit 1
+          }
+          rsync -az -e "ssh -i ~/.ssh/id_deploy -p $SSH_PORT" \
+            ./out/ "$SSH_USER@$SSH_HOST:$SSH_DIR"
