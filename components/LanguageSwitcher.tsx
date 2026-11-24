@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { CONFIG_OPTIONS_STORAGE_KEY, USER_LANGUAGE_STORAGE_KEY } from "@/lib/storage-keys";
@@ -39,7 +39,7 @@ function getLocalizedPath(pathname: string, newLang: string): string {
     return segments.join("/");
 }
 
-export default function LanguageSwitcher({
+function LanguageSwitcherContent({
     currentLang,
 }: {
     currentLang: string;
@@ -167,5 +167,14 @@ export default function LanguageSwitcher({
                 </option>
             ))}
         </select>
+    );
+}
+
+// useSearchParams() needs a Suspense boundary in the static export.
+export default function LanguageSwitcher({ currentLang }: { currentLang: string }) {
+    return (
+        <Suspense fallback={null}>
+            <LanguageSwitcherContent currentLang={currentLang} />
+        </Suspense>
     );
 }

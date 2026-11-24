@@ -1,14 +1,11 @@
 import { getRequestConfig } from "next-intl/server";
 
-export default getRequestConfig(async ({ requestLocale }) => {
-    const locale = await requestLocale;
+import { defaultLocale, isLocale } from "./locales";
 
-    const validLocale =
-        locale === "ca" ||
-        locale === "es" ||
-        locale === "en"
-            ? locale
-            : "ca";
+export default getRequestConfig(async ({ locale, requestLocale }) => {
+    // Pages pass the locale explicitly (static rendering); fall back to the request locale.
+    const requested = locale ?? (await requestLocale);
+    const validLocale = isLocale(requested) ? requested : defaultLocale;
 
     return {
         locale: validLocale,

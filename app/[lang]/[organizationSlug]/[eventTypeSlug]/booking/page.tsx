@@ -1,73 +1,27 @@
-import { notFound } from 'next/navigation';
+'use client';
 
 import {
   getTranslations,
   type Locale,
 } from '@/lib/public-i18n';
+import EventTypeStatus from '@/components/public/booking/EventTypeStatus';
+import { useEventType, usePublicRoute } from '@/lib/public/useEventType';
 
-interface EventType {
-  id: string;
-  name: string;
-  description: string | null;
-  duration: number;
-  slug: string;
-}
+export default function BookingPage() {
+  const route = usePublicRoute();
+  const state = useEventType(route?.eventTypeSlug);
 
-interface PageProps {
-  params: Promise<{
-    lang: string;
-    organizationSlug: string;
-    eventTypeSlug: string;
-  }>;
-}
-
-async function getEventType(
-  eventTypeSlug: string,
-): Promise<EventType | null> {
-  const apiUrl = process.env.INTERNAL_API_URL;
-
-  if (!apiUrl) {
-    throw new Error('INTERNAL_API_URL is not configured');
+  if (!route) {
+    return <EventTypeStatus status="not-found" />;
   }
 
-  const response = await fetch(
-    `${apiUrl}/api/public/event-types/${encodeURIComponent(eventTypeSlug)}`,
-    {
-      cache: 'no-store',
-    },
-  );
-
-  if (response.status === 404) {
-    return null;
+  if (state.status !== 'ready') {
+    return <EventTypeStatus status={state.status} />;
   }
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch event type');
-  }
-
-  return response.json();
-}
-
-export default async function BookingPage({
-  params,
-}: PageProps) {
-  const {
-    lang: locale,
-    organizationSlug,
-    eventTypeSlug,
-  } = await params;
-
-  if (!['ca', 'es', 'en'].includes(locale)) {
-    notFound();
-  }
-
+  const { locale, organizationSlug, eventTypeSlug } = route;
   const t = getTranslations(locale as Locale);
-
-  const eventType = await getEventType(eventTypeSlug);
-
-  if (!eventType) {
-    notFound();
-  }
+  const eventType = state.eventType;
 
   return (
     <main className="min-h-screen bg-gray-50">

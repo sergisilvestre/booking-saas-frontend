@@ -1,59 +1,16 @@
+'use client';
+
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { CheckCircle2 } from 'lucide-react';
-import { notFound } from 'next/navigation';
 
 import {
   getTranslations,
   type Locale,
 } from '@/lib/public-i18n';
-
-interface EventType {
-  id: string;
-  name: string;
-  description: string | null;
-  duration: number;
-  slug: string;
-}
-
-interface PageProps {
-  params: Promise<{
-    lang: string;
-    organizationSlug: string;
-    eventTypeSlug: string;
-  }>;
-  searchParams: Promise<{
-    start?: string;
-    end?: string;
-    timezone?: string;
-  }>;
-}
-
-async function getEventType(
-  eventTypeSlug: string,
-): Promise<EventType | null> {
-  const apiUrl = process.env.INTERNAL_API_URL;
-
-  if (!apiUrl) {
-    throw new Error('INTERNAL_API_URL is not configured');
-  }
-
-  const response = await fetch(
-    `${apiUrl}/api/public/event-types/${encodeURIComponent(eventTypeSlug)}`,
-    {
-      cache: 'no-store',
-    },
-  );
-
-  if (response.status === 404) {
-    return null;
-  }
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch event type');
-  }
-
-  return response.json();
-}
+import EventTypeStatus from '@/components/public/booking/EventTypeStatus';
+import { useEventType, usePublicRoute } from '@/lib/public/useEventType';
 
 function formatGoogleDate(date: string) {
   return new Date(date)
@@ -62,33 +19,25 @@ function formatGoogleDate(date: string) {
     .replace(/\.\d{3}Z$/, 'Z');
 }
 
-export default async function ConfirmationPage({
-  params,
-  searchParams,
-}: PageProps) {
-  const {
-    lang: locale,
-    organizationSlug,
-    eventTypeSlug,
-  } = await params;
+function ConfirmationPageContent() {
+  const route = usePublicRoute();
+  const state = useEventType(route?.eventTypeSlug);
+  const searchParams = useSearchParams();
+  const start = searchParams.get('start') ?? undefined;
+  const end = searchParams.get('end') ?? undefined;
+  const timezone = searchParams.get('timezone') ?? 'UTC';
 
-  const {
-    start,
-    end,
-    timezone = 'UTC',
-  } = await searchParams;
-
-  if (!['ca', 'es', 'en'].includes(locale)) {
-    notFound();
+  if (!route) {
+    return <EventTypeStatus status="not-found" />;
   }
 
+  if (state.status !== 'ready') {
+    return <EventTypeStatus status={state.status} />;
+  }
+
+  const { locale, organizationSlug, eventTypeSlug } = route;
   const t = getTranslations(locale as Locale);
-
-  const eventType = await getEventType(eventTypeSlug);
-
-  if (!eventType) {
-    notFound();
-  }
+  const eventType = state.eventType;
 
   const googleCalendarUrl =
     start && end
@@ -211,5 +160,12 @@ export default async function ConfirmationPage({
         </div>
       </div>
     </main>
+  );
+}
+export default function ConfirmationPage() {
+  return (
+    <Suspense fallback={<EventTypeStatus status="loading" />}>
+      <ConfirmationPageContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { apiFetch } from "@/lib/api";
@@ -35,7 +35,7 @@ function getBrowserTimezone(): string | null {
     return Intl.DateTimeFormat().resolvedOptions().timeZone || null;
 }
 
-export default function GoogleCallbackPage() {
+function GoogleCallbackPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const params = useParams<{ lang: string }>();
@@ -169,4 +169,13 @@ export default function GoogleCallbackPage() {
             </div>
         </main>
     );
+}
+
+// useSearchParams() needs a Suspense boundary in the static export.
+export default function GoogleCallbackPage() {
+  return (
+    <Suspense fallback={null}>
+      <GoogleCallbackPageContent />
+    </Suspense>
+  );
 }

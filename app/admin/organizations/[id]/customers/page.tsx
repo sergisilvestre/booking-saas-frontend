@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { ArrowLeft, Loader2, Users } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -12,7 +12,7 @@ type Customer = {
     created_at?: string;
 };
 
-export default function CustomersPage() {
+function CustomersPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -183,4 +183,13 @@ export default function CustomersPage() {
             </div>
         </main>
     );
+}
+
+// useSearchParams() needs a Suspense boundary in the static export.
+export default function CustomersPage() {
+  return (
+    <Suspense fallback={null}>
+      <CustomersPageContent />
+    </Suspense>
+  );
 }

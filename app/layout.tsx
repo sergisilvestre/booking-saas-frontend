@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getMessages, setRequestLocale } from "next-intl/server";
 import "./globals.css";
 
 import CookieConsent from "@/components/CookieConsent";
@@ -36,6 +36,9 @@ export default async function LangLayout({
   params,
 }: Props) {
   const { lang = "en" } = await params;
+
+  // Static rendering: without this next-intl reads the locale from request headers.
+  setRequestLocale(lang);
 
   const messages = await getMessages({
     locale: lang,

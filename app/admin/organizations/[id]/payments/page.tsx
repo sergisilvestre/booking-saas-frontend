@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
     CreditCard,
     Loader2,
@@ -21,7 +21,7 @@ type Payment = {
     created_at?: string;
 };
 
-export default function PaymentsPage() {
+function PaymentsPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -293,4 +293,13 @@ export default function PaymentsPage() {
             </div>
         </main>
     );
+}
+
+// useSearchParams() needs a Suspense boundary in the static export.
+export default function PaymentsPage() {
+  return (
+    <Suspense fallback={null}>
+      <PaymentsPageContent />
+    </Suspense>
+  );
 }

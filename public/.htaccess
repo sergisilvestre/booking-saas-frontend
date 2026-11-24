@@ -1,0 +1,20 @@
+# Apache rules for the static export on Hostinger (copied into out/ by `next build`).
+Options -MultiViews
+DirectoryIndex index.html
+RewriteEngine On
+
+# Pages live in folders (trailingSlash: true): add the slash to anything that is not a file.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_URI} !\.[a-zA-Z0-9]+$
+RewriteRule ^(.*[^/])$ /$1/ [R=301,L]
+
+# Dynamic routes are exported once with "_" as placeholder: serve them for every real value.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^admin/organizations/[^/]+/(.*)$ /admin/organizations/_/$1 [L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(ca|es|en)/[^/]+/[^/]+/(.*)$ /$1/_/_/$2 [L]
+
+ErrorDocument 404 /404.html
