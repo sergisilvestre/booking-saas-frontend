@@ -1,12 +1,16 @@
 export type OnboardingUser = {
   role?: string;
+  /** Permission slugs of the user's role (e.g. "bookings.view"). */
+  permissions?: string[];
   email_verified?: boolean;
   onboarding?: {
     status?: string;
   };
   organization?: {
+    id?: string;
     name?: string;
     slug?: string;
+    timezone?: string;
   };
   features?: {
     payments?: boolean;

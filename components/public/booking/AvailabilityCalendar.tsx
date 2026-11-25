@@ -27,6 +27,9 @@ type Locale = 'ca' | 'es' | 'en';
 interface AvailabilityCalendarProps {
     eventTypeId: string;
     locale: Locale;
+    /** IANA timezone of the organization: slots are shown in it. */
+    timezone?: string;
+    eventName?: string;
 }
 
 interface TimeSlot {
@@ -37,6 +40,7 @@ interface TimeSlot {
 interface BookingResponse {
     id: string;
     status: string;
+    cancelToken?: string;
     eventTypeId?: string;
     startsAt?: string;
     endsAt?: string;
@@ -58,6 +62,9 @@ const translations = {
         timezone: 'Zona horària',
         status: 'Estat',
         confirmedStatus: 'Confirmada',
+        pendingStatus: 'Pendent de pagament',
+        manage: 'Gestionar o cancel·lar la reserva',
+        manageHint: 'Desa aquest enllaç: et permet cancel·lar la reserva.',
         newBooking: 'Fer una nova reserva',
         addToCalendar: 'Afegir al calendari',
         googleCalendar: 'Google Calendar',
@@ -72,6 +79,9 @@ const translations = {
         timezone: 'Zona horaria',
         status: 'Estado',
         confirmedStatus: 'Confirmada',
+        pendingStatus: 'Pendiente de pago',
+        manage: 'Gestionar o cancelar la reserva',
+        manageHint: 'Guarda este enlace: te permite cancelar la reserva.',
         newBooking: 'Hacer otra reserva',
         addToCalendar: 'Añadir al calendario',
         googleCalendar: 'Google Calendar',
@@ -86,6 +96,9 @@ const translations = {
         timezone: 'Timezone',
         status: 'Status',
         confirmedStatus: 'Confirmed',
+        pendingStatus: 'Waiting for payment',
+        manage: 'Manage or cancel the booking',
+        manageHint: 'Keep this link: it lets you cancel the booking.',
         newBooking: 'Make another booking',
         addToCalendar: 'Add to calendar',
         googleCalendar: 'Google Calendar',
@@ -96,6 +109,8 @@ const translations = {
 export default function AvailabilityCalendar({
     eventTypeId,
     locale,
+    timezone = 'UTC',
+    eventName = '',
 }: AvailabilityCalendarProps) {
     const t = translations[locale];
 
@@ -112,7 +127,6 @@ export default function AvailabilityCalendar({
     const [confirmedBooking, setConfirmedBooking] =
         useState<BookingResponse | null>(null);
 
-    const timezone = 'Europe/Madrid';
 
     const today = new Date();
 
@@ -214,19 +228,16 @@ export default function AvailabilityCalendar({
         startsAt: string,
         endsAt: string,
     ) => {
-        const start = new Date(startsAt);
-        const end = new Date(endsAt);
-
-        const formatGoogleDate = (date: Date) =>
-            date
-                .toISOString()
-                .replace(/[-:]/g, '')
-                .replace(/\.\d{3}/, '');
+        // The API sends the organization's wall-clock time; Google reads it
+        // in the timezone given by ctz.
+        const formatGoogleDate = (value: string) =>
+            value.replace(' ', 'T').replace(/[-:]/g, '').slice(0, 15);
 
         const params = new URLSearchParams({
             action: 'TEMPLATE',
-            text: '30 Minute Consultation',
-            dates: `${formatGoogleDate(start)}/${formatGoogleDate(end)}`,
+            text: eventName,
+            ctz: timezone,
+            dates: `${formatGoogleDate(startsAt)}/${formatGoogleDate(endsAt)}`,
             details: `Booking ID: ${confirmedBooking?.id ?? ''}`,
             location: '',
         });
@@ -247,7 +258,7 @@ export default function AvailabilityCalendar({
         const params = new URLSearchParams({
             path: '/calendar/action/compose',
             rru: 'addevent',
-            subject: '30 Minute Consultation',
+            subject: eventName,
             startdt: start.toISOString(),
             enddt: end.toISOString(),
             body: `Booking ID: ${confirmedBooking?.id ?? ''}`,
@@ -317,15 +328,8 @@ export default function AvailabilityCalendar({
                                 </p>
 
                                 <p className="mt-1 text-sm font-medium text-gray-900">
-                                    {format(
-                                        new Date(startsAt),
-                                        'HH:mm',
-                                    )}{' '}
-                                    -{' '}
-                                    {format(
-                                        new Date(endsAt),
-                                        'HH:mm',
-                                    )}
+                                    {startsAt.slice(11, 16)} -{' '}
+                                    {endsAt.slice(11, 16)}
                                 </p>
                             </div>
                         )}
@@ -347,8 +351,9 @@ export default function AvailabilityCalendar({
                             </p>
 
                             <p className="mt-1 text-sm font-medium text-green-700">
-                                {confirmedBooking.status ||
-                                    t.confirmedStatus}
+                                {confirmedBooking.status === 'pending'
+                                    ? t.pendingStatus
+                                    : t.confirmedStatus}
                             </p>
                         </div>
                     </div>
@@ -394,6 +399,20 @@ export default function AvailabilityCalendar({
                                     {t.outlookCalendar}
                                 </a>
                             </div>
+                        </div>
+                    )}
+
+                    {confirmedBooking.cancelToken && (
+                        <div className="mt-8 border-t pt-6">
+                            <a
+                                href={`/${locale}/manage-booking/?id=${encodeURIComponent(confirmedBooking.id)}&token=${encodeURIComponent(confirmedBooking.cancelToken)}`}
+                                className="text-sm font-medium text-gray-900 underline"
+                            >
+                                {t.manage}
+                            </a>
+                            <p className="mt-1 text-xs text-gray-500">
+                                {t.manageHint}
+                            </p>
                         </div>
                     )}
 

@@ -14,7 +14,8 @@ type Props = {
 
 export default function OnboardingGuard({ children, lang }: Props) {
     const router = useRouter();
-    const pathname = usePathname();
+    // The static export uses trailingSlash, so "/en/dashboard/settings/" must match too.
+    const pathname = usePathname()?.replace(/\/+$/, "") ?? "";
 
     const { user, loadingUser } = useCurrentUser();
 
@@ -27,6 +28,13 @@ export default function OnboardingGuard({ children, lang }: Props) {
 
     const needsOnboarding =
         emailNeedsValidation || organizationNeedsValidation;
+
+    // Without a user the guard renders nothing, so send them to log in instead of a blank page.
+    useEffect(() => {
+        if (!loadingUser && !user) {
+            router.replace(`/${lang}/auth/login`);
+        }
+    }, [loadingUser, user, lang, router]);
 
     useEffect(() => {
         if (loadingUser || !user || !needsOnboarding) {

@@ -21,7 +21,7 @@ function formatGoogleDate(date: string) {
 
 function ConfirmationPageContent() {
   const route = usePublicRoute();
-  const state = useEventType(route?.eventTypeSlug);
+  const state = useEventType(route?.eventTypeSlug, route?.organizationSlug);
   const searchParams = useSearchParams();
   const start = searchParams.get('start') ?? undefined;
   const end = searchParams.get('end') ?? undefined;
@@ -71,7 +71,7 @@ function ConfirmationPageContent() {
 
           <div className="mx-auto mt-8 max-w-md rounded-xl border border-gray-200 bg-gray-50 p-6 text-left">
             <p className="text-sm font-medium text-gray-500">
-              {organizationSlug}
+              {eventType.organization?.name ?? organizationSlug}
             </p>
 
             <h2 className="mt-2 text-lg font-semibold text-gray-900">

@@ -31,7 +31,7 @@ type User = {
 
 export default function SidebarAccount({ lang }: Props) {
     const router = useRouter();
-    const pathname = usePathname();
+    const pathname = usePathname()?.replace(/\/+$/, "") ?? "";
     const t = useTranslations("dashboard.account");
 
     const [user, setUser] = useState<User | null>(null);
@@ -45,7 +45,7 @@ export default function SidebarAccount({ lang }: Props) {
             localStorage.removeItem(USER_STORAGE_KEY);
             setUser(null);
             setLoading(false);
-            router.replace(`/ ${lang}/auth/login`);
+            router.replace(`/${lang}/auth/login`);
             return;
         }
 

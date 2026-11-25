@@ -11,6 +11,15 @@ export interface PublicEventType {
   description: string | null;
   duration: number;
   slug: string;
+  priceAmount?: number;
+  currency?: string | null;
+  organization?: {
+    id: string;
+    name: string;
+    slug: string;
+    timezone: string;
+    acceptsBookings: boolean;
+  };
 }
 
 export type PublicRoute = {
@@ -44,8 +53,11 @@ type State =
   | { status: "not-found" }
   | { status: "error" };
 
-/** Loads a public event type by slug from the API (in the browser). */
-export function useEventType(eventTypeSlug: string | undefined): State {
+/** Loads a public event type of an organization from the API (in the browser). */
+export function useEventType(
+  eventTypeSlug: string | undefined,
+  organizationSlug?: string,
+): State {
   const [state, setState] = useState<State>({ status: "loading" });
 
   useEffect(() => {
@@ -54,7 +66,9 @@ export function useEventType(eventTypeSlug: string | undefined): State {
     let cancelled = false;
 
     fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/public/event-types/${encodeURIComponent(eventTypeSlug)}`,
+      organizationSlug
+        ? `${process.env.NEXT_PUBLIC_API_URL}/api/public/organizations/${encodeURIComponent(organizationSlug)}/event-types/${encodeURIComponent(eventTypeSlug)}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/api/public/event-types/${encodeURIComponent(eventTypeSlug)}`,
       { headers: { Accept: "application/json" } },
     )
       .then(async (response) => {
@@ -70,7 +84,7 @@ export function useEventType(eventTypeSlug: string | undefined): State {
     return () => {
       cancelled = true;
     };
-  }, [eventTypeSlug]);
+  }, [eventTypeSlug, organizationSlug]);
 
   return eventTypeSlug ? state : { status: "not-found" };
 }

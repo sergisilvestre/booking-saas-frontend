@@ -17,4 +17,9 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(ca|es|en)/[^/]+/[^/]+/(.*)$ /$1/_/_/$2 [L]
 
+# Public page of an organization: /{lang}/{slug}/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(ca|es|en)/[^/]+/?$ /$1/_/ [L]
+
 ErrorDocument 404 /404.html

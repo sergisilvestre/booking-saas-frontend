@@ -20,6 +20,8 @@ export interface Booking {
   customerId?: string;
   startAt?: string;
   endAt?: string;
+  startsAt?: string;
+  endsAt?: string;
   timezone?: string;
   status: string;
   source?: string;
@@ -27,6 +29,8 @@ export interface Booking {
   cancelledAt?: string | null;
   /** Set for paid event types: Stripe Checkout the customer must visit. */
   checkoutUrl?: string;
+  /** Lets the guest view or cancel the booking from a link. */
+  cancelToken?: string;
   completedAt?: string | null;
 }
 
@@ -46,9 +50,9 @@ export async function createBooking(
     notes: payload.customer.notes ?? null,
   });
 
-  if ("checkout_url" in response) {
-    return { ...response.booking, checkoutUrl: response.checkout_url };
-  }
+  const booking = "checkout_url" in response
+    ? { ...response.booking, checkoutUrl: response.checkout_url }
+    : response;
 
-  return response;
+  return { ...booking, startsAt: booking.startAt, endsAt: booking.endAt };
 }

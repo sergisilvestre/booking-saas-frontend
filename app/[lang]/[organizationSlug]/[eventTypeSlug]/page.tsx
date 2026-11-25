@@ -11,7 +11,7 @@ import { useEventType, usePublicRoute } from '@/lib/public/useEventType';
 
 export default function EventTypePage() {
   const route = usePublicRoute();
-  const state = useEventType(route?.eventTypeSlug);
+  const state = useEventType(route?.eventTypeSlug, route?.organizationSlug);
 
   if (!route) {
     return <EventTypeStatus status="not-found" />;
@@ -31,7 +31,7 @@ export default function EventTypePage() {
                 <div className="grid w-full max-w-7xl overflow-hidden rounded-2xl bg-white shadow-sm md:grid-cols-2">
                     <section className="border-b p-8 md:border-b-0 md:border-r md:p-10">
                         <p className="mb-3 text-sm font-medium text-gray-500">
-                            {organizationSlug}
+                            {eventType.organization?.name ?? organizationSlug}
                         </p>
 
                         <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
@@ -61,6 +61,8 @@ export default function EventTypePage() {
                             <AvailabilityCalendar
                                 eventTypeId={eventType.id}
                                 locale={locale as Locale}
+                                timezone={eventType.organization?.timezone}
+                                eventName={eventType.name}
                             />
                         </div>
                     </section>

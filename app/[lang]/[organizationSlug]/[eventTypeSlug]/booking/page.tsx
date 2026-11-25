@@ -9,7 +9,7 @@ import { useEventType, usePublicRoute } from '@/lib/public/useEventType';
 
 export default function BookingPage() {
   const route = usePublicRoute();
-  const state = useEventType(route?.eventTypeSlug);
+  const state = useEventType(route?.eventTypeSlug, route?.organizationSlug);
 
   if (!route) {
     return <EventTypeStatus status="not-found" />;
@@ -30,7 +30,7 @@ export default function BookingPage() {
           {/* Event summary */}
           <aside className="border-b p-8 md:border-b-0 md:border-r md:p-10">
             <p className="text-sm font-medium text-gray-500">
-              {organizationSlug}
+              {eventType.organization?.name ?? organizationSlug}
             </p>
 
             <h1 className="mt-3 text-2xl font-semibold tracking-tight text-gray-900">
