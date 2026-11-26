@@ -94,7 +94,9 @@
         "footer": {
             "copyright": "© 2026 Booking. All rights reserved.",
             "privacy": "Privacy",
-            "terms": "Terms"
+            "terms": "Terms",
+            "legal": "Legal notice",
+            "cookies": "Cookies"
         }
     },
     "register": {
