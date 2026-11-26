@@ -93,7 +93,9 @@
         "footer": {
             "copyright": "© 2026 Booking. Tots els drets reservats.",
             "privacy": "Privacitat",
-            "terms": "Termes i condicions"
+            "terms": "Termes i condicions",
+            "legal": "Avís legal",
+            "cookies": "Galetes"
         }
     },
     "register": {

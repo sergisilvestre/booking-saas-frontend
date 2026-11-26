@@ -361,9 +361,13 @@ export default async function HomePage({
               {t("footer.privacy")}
             </Link>
 
-            <a href="#" className="hover:text-gray-900">
-              {t("footer.terms")}
-            </a>
+            <Link href={`/${lang}/aviso-legal`} className="hover:text-gray-900">
+              {t("footer.legal")}
+            </Link>
+
+            <Link href={`/${lang}/cookies`} className="hover:text-gray-900">
+              {t("footer.cookies")}
+            </Link>
 
             <CookieSettingsButton />
           </div>
